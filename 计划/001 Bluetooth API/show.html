@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <button onclick="req()">获取电量</button>
+    <pre id="result"></pre>
+    <script>
+      const result = document.getElementById("result");
+      async function req() {
+        const device = await navigator.bluetooth.requestDevice({
+          filters: [{ services: ["battery_service"] }],
+        });
+        device.gatt.connect();
+        setTimeout(async () => {
+          const service = (await device.gatt.getPrimaryServices())[0];
+          const char = (await service.getCharacteristics())[0];
+          const view = await char.readValue();
+          const value = view.getUint8(0);
+          result.textContent = `设备: ${device.name}\n电量: ${value}%`;
+        }, 100);
+      }
+    </script>
+  </body>
+</html>
